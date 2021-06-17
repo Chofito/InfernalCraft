@@ -1,0 +1,6 @@
+name: Infernalcraft
+version: @version@
+main: org.darksun.infernalcraft.infernalcraft.Infernalcraft
+api-version: 1.17
+load: STARTUP
+authors: [ Chofito ]
