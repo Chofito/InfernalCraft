@@ -1,7 +1,8 @@
 name: InfernalCraft
-version: @version@
-main: org.darksun.infernalcraft.infernalcraft.Infernalcraft
+version: ${project.version}
+main: io.chofito.infernalcraft.infernalcraft.InfernalCraft
 api-version: 1.17
-load: STARTUP
 authors: [ Chofito ]
+description: A mod with tweaks to improve minecraft difficulty over time
 depend: [ helper ]
+

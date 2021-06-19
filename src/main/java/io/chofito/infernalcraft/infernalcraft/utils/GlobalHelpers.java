@@ -1,4 +1,4 @@
-package org.darksun.infernalcraft.infernalcraft.utils;
+package io.chofito.infernalcraft.infernalcraft.utils;
 
 public class GlobalHelpers {
     public static boolean getChance(double chance) {

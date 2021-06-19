@@ -1,22 +1,20 @@
-package org.darksun.infernalcraft.infernalcraft.events;
+package io.chofito.infernalcraft.infernalcraft.events;
 
-import de.leonhard.storage.Json;
+import de.leonhard.storage.Config;
 import me.lucko.helper.Events;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.darksun.infernalcraft.infernalcraft.utils.GlobalHelpers;
+import io.chofito.infernalcraft.infernalcraft.utils.GlobalHelpers;
 
 public class HostileMobsEvents {
     public static void setupCustomZombieSpawn() {
@@ -32,7 +30,7 @@ public class HostileMobsEvents {
                 });
     }
 
-    public static void setupCustomCreeperSpawn(Json config) {
+    public static void setupCustomCreeperSpawn(Config config) {
         Events.subscribe(CreatureSpawnEvent.class)
                 .filter(event -> event.getEntity().getType() == EntityType.CREEPER)
                 .filter(event -> event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL)
@@ -42,6 +40,17 @@ public class HostileMobsEvents {
                         creeperEntity.setPowered(true);
                         creeperEntity.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999, 999999));
                     }
+                });
+    }
+
+    public static void onCreeperDeathRemovePotionEffect() {
+        Events.subscribe(EntityExplodeEvent.class)
+                .filter(event -> event.getEntity().getType() == EntityType.CREEPER)
+                .handler(event -> {
+                    Creeper creeper = (Creeper) event.getEntity();
+                    creeper.getActivePotionEffects().stream()
+                            .map(PotionEffect::getType)
+                            .forEach(creeper::removePotionEffect);
                 });
     }
 
