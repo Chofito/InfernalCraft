@@ -1,6 +1,6 @@
-name: InfernalCraft
+name: ProyectoX
 version: ${project.version}
-main: io.chofito.infernalcraft.infernalcraft.InfernalCraft
+main: io.chofito.proyectox.ProyectoX
 api-version: 1.17
 authors: [ Chofito ]
 description: A mod with tweaks to improve minecraft difficulty over time
