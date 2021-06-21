@@ -1,12 +1,10 @@
 package io.chofito.proyectox;
 
 import de.leonhard.storage.Json;
-import me.lucko.helper.Events;
 import me.lucko.helper.plugin.ap.Plugin;
 import me.lucko.helper.plugin.ap.PluginDependency;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -47,9 +45,6 @@ public final class ProyectoX extends JavaPlugin {
         scheduler = getServer().getScheduler();
         world = Bukkit.getWorld("world");
         setupListeners();
-
-        Events.subscribe(PlayerJoinEvent.class)
-                .handler(event -> event.getPlayer().setGravity(true));
 
         if (infernalCraftConfig.getOrSetDefault("enableBloodMoonModule", true)) {
             setupBloodMoon();

@@ -286,7 +286,6 @@ public class BloodMoon {
                 }
             }
 
-
             world.strikeLightningEffect(player.getLocation());
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 200,1));
 

@@ -1,6 +1,5 @@
 package io.chofito.proyectox.events;
 
-import de.leonhard.storage.Config;
 import de.leonhard.storage.Json;
 import me.lucko.helper.Events;
 import org.bukkit.Material;
