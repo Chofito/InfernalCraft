@@ -1,8 +1,8 @@
 package io.chofito.proyectox.bloodmoon;
 
 import de.leonhard.storage.Json;
+import io.chofito.proyectox.mobs.EntityBuilder;
 import io.chofito.proyectox.random.ObjectWeighted;
-import io.chofito.proyectox.utils.EntityHelpers;
 import io.chofito.proyectox.utils.GlobalHelpers;
 import io.chofito.proyectox.utils.ItemHelpers;
 import me.lucko.helper.Events;
@@ -15,7 +15,6 @@ import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
@@ -238,6 +237,8 @@ public class BloodMoon {
     }
 
     private void setupHordes() {
+        int hordeInterval = bloodMoonConfig.getOrSetDefault("hordeInterval", 500);
+
         Schedulers.sync().runRepeating(task -> {
             if (!isInProgress) task.close();
 
@@ -272,27 +273,28 @@ public class BloodMoon {
                 newMobLocation.add(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
 
                 newMobLocation.setY(world.getHighestBlockYAt(newMobLocation) + 1);
-                LivingEntity spawnedEntity = (LivingEntity) world
-                        .spawnEntity( newMobLocation, EntityHelpers.getEntityTypeFromString(entityTypeString));
-                spawnedEntity.setCustomName(entityName);
 
-                if (spawnedEntity.getType() != EntityType.SPIDER) {
+                EntityBuilder entityToSpawn = EntityBuilder
+                        .ofString(entityTypeString, newMobLocation)
+                        .setCustomName(entityName);
+
+                if (entityToSpawn.getType() != EntityType.SPIDER) {
                     String material = bloodMoonConfig.getOrSetDefault("mobsToSpawn." + nameJsonSelector + ".mainHand", "IRON_SWORD");
-                    ItemStackBuilder builder = ItemStackBuilder
-                            .of(ItemHelpers.getMaterialFromString(material));
-                    ItemStack weapong = builder.build();
-                    spawnedEntity.getEquipment()
-                            .setItemInMainHand(weapong);
+                    ItemStack weapon = ItemStackBuilder
+                            .of(ItemHelpers.getMaterialFromString(material))
+                            .build();
+                    entityToSpawn.setItemMainHand(weapon);
                 }
             }
 
             world.strikeLightningEffect(player.getLocation());
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 200,1));
 
-        }, 0, 200);
+        }, 0, hordeInterval);
     }
 
     private void setupSomeDefaultSettings() {
+        bloodMoonConfig.setDefault("hordeInterval", 500);
         bloodMoonConfig.setDefault("maxMobsPerHorde", 24);
         bloodMoonConfig.setDefault("minMobsPerHorde", 10);
         bloodMoonConfig.setDefault("hordeMaxDistance", 16);

@@ -1,4 +1,4 @@
-package io.chofito.proyectox.bosses;
+package io.chofito.proyectox.mobs.bosses;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
