@@ -279,11 +279,60 @@ public class BloodMoon {
                         .setCustomName(entityName);
 
                 if (entityToSpawn.getType() != EntityType.SPIDER) {
-                    String material = bloodMoonConfig.getOrSetDefault("mobsToSpawn." + nameJsonSelector + ".mainHand", "IRON_SWORD");
-                    ItemStack weapon = ItemStackBuilder
-                            .of(ItemHelpers.getMaterialFromString(material))
-                            .build();
-                    entityToSpawn.setItemMainHand(weapon);
+                    Material mainHandItemMaterial = ItemHelpers
+                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".mainHand"));
+                    Material offHandItemMaterial = ItemHelpers
+                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".offHand"));
+                    Material helmetMaterial = ItemHelpers
+                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".helmet"));
+                    Material chestplateMaterial = ItemHelpers
+                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".chestplate"));
+                    Material leggingsMaterial = ItemHelpers
+                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".leggings"));
+                    Material bootsMaterial = ItemHelpers
+                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".boots"));
+
+                    if (mainHandItemMaterial != null) {
+                        ItemStack mainHandItem = ItemStackBuilder
+                                .of(mainHandItemMaterial)
+                                .build();
+                        entityToSpawn.setItemMainHand(mainHandItem);
+                    }
+
+                    if (offHandItemMaterial != null) {
+                        ItemStack offHandItem = ItemStackBuilder
+                                .of(offHandItemMaterial)
+                                .build();
+                        entityToSpawn.setItemOffHand(offHandItem);
+                    }
+
+                    if (helmetMaterial != null) {
+                        ItemStack helmetItem = ItemStackBuilder
+                                .of(helmetMaterial)
+                                .build();
+                        entityToSpawn.setHelmet(helmetItem);
+                    }
+
+                    if (chestplateMaterial != null) {
+                        ItemStack chestplateItem = ItemStackBuilder
+                                .of(chestplateMaterial)
+                                .build();
+                        entityToSpawn.setChestplate(chestplateItem);
+                    }
+
+                    if (leggingsMaterial != null) {
+                        ItemStack leggingsItem = ItemStackBuilder
+                                .of(mainHandItemMaterial)
+                                .build();
+                        entityToSpawn.setItemMainHand(leggingsItem);
+                    }
+
+                    if (bootsMaterial != null) {
+                        ItemStack bootsItem = ItemStackBuilder
+                                .of(bootsMaterial)
+                                .build();
+                        entityToSpawn.setItemOffHand(bootsItem);
+                    }
                 }
             }
 
@@ -307,12 +356,24 @@ public class BloodMoon {
         bloodMoonConfig.setDefault("onSleepExplodePlayer", false);
         bloodMoonConfig.setDefault("experienceMultiplier", true);
         bloodMoonConfig.setDefault("mobsToSpawn.hordeEnemies", Arrays.asList("Guerrero Zombie", "Guerrero Oscuro"));
+        // Guerrero Zombie
         bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.entity", "ZOMBIE");
         bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.mainHand", "IRON_SWORD");
         bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.spawnChance", 0.75);
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.damageMultiplier", 1.25);
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.lifeMultiplier", 1.5);
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.chestplate", "LEATHER_CHESTPLATE");
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.leggings", "LEATHER_LEGGINGS");
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.helmet", "LEATHER_HELMET");
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.boots", "LEATHER_BOOTS");
+        // Guerrero Oscuro
         bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.entity", "WITHER_SKELETON");
         bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.mainHand", "IRON_AXE");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.offHand", "SHIELD");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.spawnChance", 0.25);
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.offHand", "TOTEM_OF_UNDYING");
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.spawnChance", 0.1);
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.damageMultiplier", 2);
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.lifeMultiplier", 2.5);
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.chestplate", "NETHERITE_CHESTPLATE");
+        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.leggings", "NETHERITE_LEGGINGS");
     }
 }

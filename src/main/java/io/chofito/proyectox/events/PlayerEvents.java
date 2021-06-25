@@ -18,9 +18,9 @@ import io.chofito.proyectox.utils.GlobalHelpers;
 public class PlayerEvents {
     public static void setupOnPlayerWithTotemDeathEvents() {
         Events.subscribe(EntityResurrectEvent.class, EventPriority.MONITOR)
-                .handler(e -> {
-                    if (GlobalHelpers.getChance(0.5)) {
-                        e.setCancelled(true);
+                .handler(event -> {
+                    if (GlobalHelpers.getChance(0.5) && event.getEntity() instanceof Player) {
+                        event.setCancelled(true);
                     }
                 });
     }

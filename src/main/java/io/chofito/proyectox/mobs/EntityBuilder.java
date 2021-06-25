@@ -43,12 +43,16 @@ public class EntityBuilder {
     }
 
     public EntityBuilder setItemMainHand(ItemStack item) {
+        if (item == null) return this;
+
         this.setItemMainHand(item, 0);
 
         return this;
     }
 
     public EntityBuilder setItemMainHand(ItemStack item, float dropChance) {
+        if (item == null) return this;
+
         if (entity instanceof LivingEntity) {
             ((LivingEntity)(entity)).getEquipment().setItemInMainHand(item);
             ((LivingEntity)(entity)).getEquipment().setItemInMainHandDropChance(dropChance);
@@ -57,15 +61,91 @@ public class EntityBuilder {
     }
 
     public EntityBuilder setItemOffHand(ItemStack item) {
-        this.setItemMainHand(item, 0);
+        if (item == null) return this;
+
+        this.setItemOffHand(item, 0);
 
         return this;
     }
 
     public EntityBuilder setItemOffHand(ItemStack item, float dropChance) {
+        if (item == null) return this;
+
         if (entity instanceof LivingEntity) {
             ((LivingEntity)(entity)).getEquipment().setItemInOffHand(item);
             ((LivingEntity)(entity)).getEquipment().setItemInOffHandDropChance(dropChance);
+        }
+        return this;
+    }
+
+    public EntityBuilder setHelmet(ItemStack item) {
+        if (item == null) return this;
+
+        this.setHelmet(item, 0);
+
+        return this;
+    }
+
+    public EntityBuilder setHelmet(ItemStack item, float dropChance) {
+        if (item == null) return this;
+
+        if (entity instanceof LivingEntity) {
+            ((LivingEntity)(entity)).getEquipment().setHelmet(item);
+            ((LivingEntity)(entity)).getEquipment().setHelmetDropChance(dropChance);
+        }
+        return this;
+    }
+
+    public EntityBuilder setChestplate(ItemStack item) {
+        if (item == null) return this;
+
+        this.setChestplate(item, 0);
+
+        return this;
+    }
+
+    public EntityBuilder setChestplate(ItemStack item, float dropChance) {
+        if (item == null) return this;
+
+        if (entity instanceof LivingEntity) {
+            ((LivingEntity)(entity)).getEquipment().setChestplate(item);
+            ((LivingEntity)(entity)).getEquipment().setChestplateDropChance(dropChance);
+        }
+        return this;
+    }
+
+    public EntityBuilder setBoots(ItemStack item) {
+        if (item == null) return this;
+
+        this.setBoots(item, 0);
+
+        return this;
+    }
+
+    public EntityBuilder setBoots(ItemStack item, float dropChance) {
+        if (item == null) return this;
+
+        if (entity instanceof LivingEntity) {
+            ((LivingEntity)(entity)).getEquipment().setBoots(item);
+            ((LivingEntity)(entity)).getEquipment().setBootsDropChance(dropChance);
+        }
+        return this;
+    }
+
+    public EntityBuilder setLeggings(ItemStack item) {
+        if (item == null) return this;
+
+        this.setLeggings(item, 0);
+
+        return this;
+    }
+
+    public EntityBuilder setLeggings(ItemStack item, float dropChance) {
+        if (item == null) return this;
+
+        if (entity instanceof LivingEntity) {
+            ((LivingEntity)(entity)).getEquipment().setLeggings(item);
+            ((LivingEntity)(entity)).getEquipment().setLeggingsDropChance(dropChance);
         }
         return this;
     }
