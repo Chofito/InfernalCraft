@@ -1,6 +1,7 @@
 package io.chofito.proyectox.bloodmoon;
 
 import de.leonhard.storage.Json;
+import io.chofito.proyectox.ProyectoX;
 import io.chofito.proyectox.mobs.EntityBuilder;
 import io.chofito.proyectox.random.ObjectWeighted;
 import io.chofito.proyectox.utils.GlobalHelpers;
@@ -14,6 +15,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.*;
@@ -24,18 +26,20 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.*;
 
 public class BloodMoon {
-    private boolean isInProgress = false;
-    private int originalWorldMobCap = 0;
-    // This is not the best name but disable day count for the rest of the day
-    private boolean isCurrentOrNextDayChecked = false;
     private BossBar bloodMoonBar;
-    private Random random = new Random();
     private final World world;
     private final Json bloodMoonConfig;
+    private final Json mobsConfig;
+    private boolean isInProgress = false;
+    private int originalWorldMobCap = 70;
+    // This is not the best name but disable day count for the rest of the day
+    private boolean isCurrentOrNextDayChecked = false;
+    private Random random = new Random();
 
     public BloodMoon(World bloodMoonWorld, Json config) {
         this.world = bloodMoonWorld;
-        bloodMoonConfig = config;
+        this.bloodMoonConfig = config;
+        this.mobsConfig = ProyectoX.getInstance().getMobsConfig();
 
         setupSomeDefaultSettings();
 
@@ -55,11 +59,9 @@ public class BloodMoon {
 
             if (world != null && world.getTime() < 13000 && isInProgress) {
                 this.stopBloodMoon();
-                isInProgress = false;
             } else if (world != null && world.getTime() >= 13000 && !isInProgress) {
                 if (dayCounter % dayInterval == 0) {
                     this.startBloodMoon();
-                    isInProgress = true;
                 }
             }
 
@@ -69,7 +71,7 @@ public class BloodMoon {
             } else if (world != null && world.getTime() >= 1000 && isCurrentOrNextDayChecked) {
                 isCurrentOrNextDayChecked = false;
             }
-        }, 0L, 200L);
+        }, 0L, 40L);
     }
 
     public void startBloodMoon() {
@@ -240,14 +242,17 @@ public class BloodMoon {
         int hordeInterval = bloodMoonConfig.getOrSetDefault("hordeInterval", 500);
 
         Schedulers.sync().runRepeating(task -> {
-            if (!isInProgress) task.close();
+            if (!isInProgress) {
+                task.close();
+                return;
+            }
 
             List<Player> players = world.getPlayers();
-            List<String> hordeEnemiesNames = (List<String>) bloodMoonConfig.getList("mobsToSpawn.hordeEnemies");
+            List<String> hordeEnemiesNames = (List<String>) bloodMoonConfig.getList("hordeEnemies");
             List<ObjectWeighted> hordeEnemiesWeighted = new ArrayList<>();
 
             for (String enemyName : hordeEnemiesNames) {
-                double spawnChance = bloodMoonConfig.getOrSetDefault("mobsToSpawn." + enemyName.replaceAll("\\s+","") + ".spawnChance", 0.25);
+                double spawnChance = mobsConfig.getOrSetDefault(enemyName + ".spawnChance", 0.25);
                 hordeEnemiesWeighted.add(new ObjectWeighted(enemyName, spawnChance));
             }
 
@@ -266,79 +271,17 @@ public class BloodMoon {
             for (int i = 0; i <= totalMobs; i++) {
                 Location newMobLocation = player.getLocation().clone();
                 String entityName = entitySelector.pick(random).getName();
-                String nameJsonSelector = entityName.replaceAll("\\s+","");
-                String entityTypeString = bloodMoonConfig.getOrSetDefault("mobsToSpawn." + nameJsonSelector + ".entity", "ZOMBIE");
                 double angle = random.nextDouble() * 360;
                 double radius = GlobalHelpers.getRandomFromRange(hordeMinDistance, hordeMaxDistance, random);
                 newMobLocation.add(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
 
                 newMobLocation.setY(world.getHighestBlockYAt(newMobLocation) + 1);
 
-                EntityBuilder entityToSpawn = EntityBuilder
-                        .ofString(entityTypeString, newMobLocation)
-                        .setCustomName(entityName);
-
-                if (entityToSpawn.getType() != EntityType.SPIDER) {
-                    Material mainHandItemMaterial = ItemHelpers
-                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".mainHand"));
-                    Material offHandItemMaterial = ItemHelpers
-                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".offHand"));
-                    Material helmetMaterial = ItemHelpers
-                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".helmet"));
-                    Material chestplateMaterial = ItemHelpers
-                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".chestplate"));
-                    Material leggingsMaterial = ItemHelpers
-                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".leggings"));
-                    Material bootsMaterial = ItemHelpers
-                            .getMaterialFromString(bloodMoonConfig.getString("mobsToSpawn." + nameJsonSelector + ".boots"));
-
-                    if (mainHandItemMaterial != null) {
-                        ItemStack mainHandItem = ItemStackBuilder
-                                .of(mainHandItemMaterial)
-                                .build();
-                        entityToSpawn.setItemMainHand(mainHandItem);
-                    }
-
-                    if (offHandItemMaterial != null) {
-                        ItemStack offHandItem = ItemStackBuilder
-                                .of(offHandItemMaterial)
-                                .build();
-                        entityToSpawn.setItemOffHand(offHandItem);
-                    }
-
-                    if (helmetMaterial != null) {
-                        ItemStack helmetItem = ItemStackBuilder
-                                .of(helmetMaterial)
-                                .build();
-                        entityToSpawn.setHelmet(helmetItem);
-                    }
-
-                    if (chestplateMaterial != null) {
-                        ItemStack chestplateItem = ItemStackBuilder
-                                .of(chestplateMaterial)
-                                .build();
-                        entityToSpawn.setChestplate(chestplateItem);
-                    }
-
-                    if (leggingsMaterial != null) {
-                        ItemStack leggingsItem = ItemStackBuilder
-                                .of(mainHandItemMaterial)
-                                .build();
-                        entityToSpawn.setItemMainHand(leggingsItem);
-                    }
-
-                    if (bootsMaterial != null) {
-                        ItemStack bootsItem = ItemStackBuilder
-                                .of(bootsMaterial)
-                                .build();
-                        entityToSpawn.setItemOffHand(bootsItem);
-                    }
-                }
+                EntityBuilder.buildEntityFromConfig(entityName, mobsConfig, newMobLocation);
             }
 
             world.strikeLightningEffect(player.getLocation());
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 200,1));
-
         }, 0, hordeInterval);
     }
 
@@ -355,25 +298,6 @@ public class BloodMoon {
         bloodMoonConfig.setDefault("onSleepThunderPlayer", false);
         bloodMoonConfig.setDefault("onSleepExplodePlayer", false);
         bloodMoonConfig.setDefault("experienceMultiplier", true);
-        bloodMoonConfig.setDefault("mobsToSpawn.hordeEnemies", Arrays.asList("Guerrero Zombie", "Guerrero Oscuro"));
-        // Guerrero Zombie
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.entity", "ZOMBIE");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.mainHand", "IRON_SWORD");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.spawnChance", 0.75);
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.damageMultiplier", 1.25);
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.lifeMultiplier", 1.5);
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.chestplate", "LEATHER_CHESTPLATE");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.leggings", "LEATHER_LEGGINGS");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.helmet", "LEATHER_HELMET");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroZombie.boots", "LEATHER_BOOTS");
-        // Guerrero Oscuro
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.entity", "WITHER_SKELETON");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.mainHand", "IRON_AXE");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.offHand", "TOTEM_OF_UNDYING");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.spawnChance", 0.1);
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.damageMultiplier", 2);
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.lifeMultiplier", 2.5);
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.chestplate", "NETHERITE_CHESTPLATE");
-        bloodMoonConfig.setDefault("mobsToSpawn.GuerreroOscuro.leggings", "NETHERITE_LEGGINGS");
+        bloodMoonConfig.setDefault("hordeEnemies", Arrays.asList("GuerreroZombie", "GuerreroOscuro"));
     }
 }

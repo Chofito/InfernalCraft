@@ -1,8 +1,12 @@
 package io.chofito.proyectox.mobs;
 
+import de.leonhard.storage.Json;
 import io.chofito.proyectox.ProyectoX;
 import io.chofito.proyectox.utils.EntityHelpers;
+import io.chofito.proyectox.utils.ItemHelpers;
+import me.lucko.helper.item.ItemStackBuilder;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -30,15 +34,6 @@ public class EntityBuilder {
 
     public EntityBuilder setCustomName(String customName) {
         this.entity.setCustomName(customName);
-        return this;
-    }
-
-    public EntityBuilder setMaxHealth(double newMaxHealth) {
-        if (entity instanceof LivingEntity) {
-            ((LivingEntity)(entity)).getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(newMaxHealth);
-            ((LivingEntity)(entity)).setHealth(newMaxHealth);
-        }
-
         return this;
     }
 
@@ -148,6 +143,103 @@ public class EntityBuilder {
             ((LivingEntity)(entity)).getEquipment().setLeggingsDropChance(dropChance);
         }
         return this;
+    }
+
+    public EntityBuilder setAttributeValue(Attribute attribute, double value) {
+        if (attribute != null) {
+            ((LivingEntity)(entity)).getAttribute(attribute).setBaseValue(value);
+        }
+
+        return this;
+    }
+
+    public double getAttributeValue(Attribute attribute) {
+        if (attribute != null) {
+            return ((LivingEntity)(entity)).getAttribute(attribute).getBaseValue();
+        }
+
+        return 0;
+    }
+
+    public EntityBuilder setMaxHealth(double value) {
+        this.setAttributeValue(Attribute.GENERIC_MAX_HEALTH, value);
+        ((LivingEntity)(entity)).setHealth(value);
+
+        return this;
+    }
+
+    public EntityBuilder multiplyMaxHealth(double multiplier) {
+        this.setMaxHealth(multiplier * this.getAttributeValue(Attribute.GENERIC_MAX_HEALTH));
+
+        return this;
+    }
+
+    public static Entity buildEntityFromConfig(String key, Json configProvider, Location location) {
+        if (key == null || configProvider == null || location == null) return null;
+
+        String entityTypeString = configProvider.getOrSetDefault(key + ".entity", "ZOMBIE");
+        EntityBuilder spawnedEntity = EntityBuilder.ofString(entityTypeString, location);
+        Material mainHandItemMaterial = ItemHelpers
+                .getMaterialFromString(configProvider.getString( key + ".mainHand"));
+        Material offHandItemMaterial = ItemHelpers
+                .getMaterialFromString(configProvider.getString(key + ".offHand"));
+        Material helmetMaterial = ItemHelpers
+                .getMaterialFromString(configProvider.getString(key + ".helmet"));
+        Material chestplateMaterial = ItemHelpers
+                .getMaterialFromString(configProvider.getString(key + ".chestplate"));
+        Material leggingsMaterial = ItemHelpers
+                .getMaterialFromString(configProvider.getString(key + ".leggings"));
+        Material bootsMaterial = ItemHelpers
+                .getMaterialFromString(configProvider.getString(key + ".boots"));
+        String displayName = configProvider.getString(key + ".displayName");
+
+        if (displayName != null) {
+            spawnedEntity.setCustomName(displayName);
+        }
+
+        if (mainHandItemMaterial != null) {
+            ItemStack mainHandItem = ItemStackBuilder
+                    .of(mainHandItemMaterial)
+                    .build();
+            spawnedEntity.setItemMainHand(mainHandItem);
+        }
+
+        if (offHandItemMaterial != null) {
+            ItemStack offHandItem = ItemStackBuilder
+                    .of(offHandItemMaterial)
+                    .build();
+            spawnedEntity.setItemOffHand(offHandItem);
+        }
+
+        if (helmetMaterial != null) {
+            ItemStack helmetItem = ItemStackBuilder
+                    .of(helmetMaterial)
+                    .build();
+            spawnedEntity.setHelmet(helmetItem);
+        }
+
+        if (chestplateMaterial != null) {
+            ItemStack chestplateItem = ItemStackBuilder
+                    .of(chestplateMaterial)
+                    .build();
+            spawnedEntity.setChestplate(chestplateItem);
+        }
+
+        if (leggingsMaterial != null) {
+            ItemStack leggingsItem = ItemStackBuilder
+                    .of(leggingsMaterial)
+                    .build();
+            spawnedEntity.setLeggings(leggingsItem);
+        }
+
+        if (bootsMaterial != null) {
+            ItemStack bootsItem = ItemStackBuilder
+                    .of(bootsMaterial)
+                    .build();
+            spawnedEntity.setBoots(bootsItem);
+        }
+
+        return spawnedEntity.build();
     }
 
     public EntityType getType() {

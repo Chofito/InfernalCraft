@@ -1,9 +1,15 @@
 package io.chofito.proyectox.utils;
 
 
+import xyz.xenondevs.particle.ParticleEffect;
+
 import java.util.Random;
 
 public class GlobalHelpers {
+    public static ParticleEffect getParticleEffectFromString(String particleEffectString) {
+        return ParticleEffect.valueOf(particleEffectString);
+    }
+
     public static int getRandomFromRange(int min, int max) {
         Random random = new Random();
 
