@@ -1,32 +1,24 @@
 package io.chofito.proyectox;
 
 import de.leonhard.storage.Json;
+import io.chofito.proyectox.configuration.DefaultItemsConfiguration;
 import io.chofito.proyectox.configuration.DefaultMobsConfiguration;
-import me.lucko.helper.Events;
-import me.lucko.helper.Schedulers;
-import me.lucko.helper.item.ItemStackBuilder;
+import io.chofito.proyectox.configuration.GlobalConfiguration;
+import io.chofito.proyectox.deathtrain.DeathTrain;
+import io.chofito.proyectox.events.NeutralMobsEvents;
+import io.chofito.proyectox.hardcoremobs.HardcoreMobs;
 import me.lucko.helper.plugin.ap.Plugin;
 import me.lucko.helper.plugin.ap.PluginDependency;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
-import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import io.chofito.proyectox.bloodmoon.BloodMoon;
 import io.chofito.proyectox.events.HostileMobsEvents;
 import io.chofito.proyectox.events.PlayerEvents;
-import org.bukkit.util.EulerAngle;
-import xyz.xenondevs.particle.ParticleBuilder;
-import xyz.xenondevs.particle.ParticleEffect;
 
-import java.util.Arrays;
+import java.util.Random;
 
 @Plugin(
         apiVersion = "1.17",
@@ -41,12 +33,19 @@ public final class ProyectoX extends JavaPlugin {
     private static ProyectoX instance;
     private Json infernalCraftConfig;
     private Json bloodMoonConfig;
+    private Json deathTrainConfig;
+    private Json hardcoreMobsConfig;
     private Json mobsConfig;
     private Json itemsConfig;
-    private Json deathTrainConfig;
     private BukkitScheduler scheduler;
     private BloodMoon bloodMoon;
+    private DeathTrain deathTrain;
+    private HardcoreMobs hardcoreMobs;
     private World world;
+    private Random random;
+    private HostileMobsEvents hostileMobsEvents;
+    private PlayerEvents playerEvents;
+    private NeutralMobsEvents neutralMobsEvents;
 
     public static ProyectoX getInstance() {
         return instance;
@@ -60,47 +59,32 @@ public final class ProyectoX extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         instance = this;
-        infernalCraftConfig = new Json("infernalcraft", "plugins/Infernalcraft");
-        bloodMoonConfig = new Json("bloodmoon", "plugins/Infernalcraft");
-        mobsConfig = new Json("custom_mobs", "plugins/Infernalcraft");
-        itemsConfig = new Json("custom_items", "plugins/Infernalcraft");
-        deathTrainConfig = new Json("deathtrain", "plugins/Infernalcraft");
+        this.infernalCraftConfig = new Json("infernalcraft", "plugins/Infernalcraft");
+        this.bloodMoonConfig = new Json("bloodmoon", "plugins/Infernalcraft");
+        this.deathTrainConfig = new Json("deathtrain", "plugins/Infernalcraft");
+        this.hardcoreMobsConfig = new Json("hardcoremobs", "plugins/Infernalcraft");
+        this.mobsConfig = new Json("custom_mobs", "plugins/Infernalcraft");
+        this.itemsConfig = new Json("custom_items", "plugins/Infernalcraft");
 
-        scheduler = getServer().getScheduler();
-        world = Bukkit.getWorld("world");
+        this.hostileMobsEvents = new HostileMobsEvents(this.infernalCraftConfig);
+        this.playerEvents = new PlayerEvents(this.itemsConfig);
+        this.neutralMobsEvents = new NeutralMobsEvents();
+
+        this.scheduler = getServer().getScheduler();
+        this.world = Bukkit.getWorld("world");
         setupDefaultSettings();
         setupListeners();
 
-        Events.subscribe(PlayerJoinEvent.class)
-                .handler(event -> {
-                    ItemStack ruinedSword = ItemStackBuilder.of(Material.DIAMOND_SWORD)
-                            .amount(1)
-                            .name("Ruined King Sword")
-                            .breakable(false)
-                            .enchant(Enchantment.DAMAGE_ALL, 10)
-                            .showAttributes()
-                            .lore("An ancient sword from a Ruined King...")
-                            .build();
-
-                    Schedulers.sync().runRepeating(task -> {
-                        world.getPlayers().stream()
-                                .forEach(player -> {
-                                    Arrays.stream(player.getInventory().getContents()).forEach(itemStack -> {
-                                        if (itemStack.getItemMeta().getDisplayName() == "Espada Demoniaca") {
-                                            new ParticleBuilder(ParticleEffect.SOUL, player.getLocation())
-                                                    .setOffsetY(1f)
-                                                    .setOffsetX(0.5f)
-                                                    .setOffsetZ(0.5f)
-                                                    .setAmount(8)
-                                                    .display();
-                                        }
-                                    });
-                                });
-                    }, 0, 10);
-                });
-
-        if (infernalCraftConfig.getOrSetDefault("enableBloodMoonModule", true)) {
+        if (this.infernalCraftConfig.getBoolean("enableBloodMoonModule")) {
             setupBloodMoon();
+        }
+
+        if (this.infernalCraftConfig.getBoolean("enableDeathTrainModule")) {
+            setupDeathTrain();
+        }
+
+        if (this.infernalCraftConfig.getBoolean("enableHardCoreMobs")) {
+            setupHardcoreMobs();
         }
     }
 
@@ -110,23 +94,29 @@ public final class ProyectoX extends JavaPlugin {
     }
 
     public void setupListeners() {
-        PlayerEvents.setupOnPlayerJoinEvents();
-        PlayerEvents.setupOnPlayerWithTotemDeathEvents();
-        PlayerEvents.setupOnPlayerDeathEvent();
-        HostileMobsEvents.setupCustomZombieSpawn();
-        HostileMobsEvents.setupCustomCreeperSpawn(infernalCraftConfig);
-        HostileMobsEvents.setupCustomSkeletonSpawn();
-        HostileMobsEvents.onCreeperDeathRemovePotionEffect();
-        HostileMobsEvents.setupShulkerExplosion();
+        this.playerEvents.setupEvents();
+        this.hostileMobsEvents.setupEvents();
+        this.neutralMobsEvents.setupEvents();
     }
 
     public void setupBloodMoon() {
-        bloodMoon = new BloodMoon(world, bloodMoonConfig);
-        bloodMoon.setupBloodMoonEvents();
+        this.bloodMoon = new BloodMoon(this.world, this.bloodMoonConfig, this.mobsConfig);
+        this.bloodMoon.setupBloodMoonEvents();
+    }
+
+    private void setupDeathTrain() {
+        this.deathTrain = new DeathTrain(this.deathTrainConfig);
+    }
+
+    private void setupHardcoreMobs() {
+        this.hardcoreMobs = new HardcoreMobs(this.hardcoreMobsConfig);
+        this.hardcoreMobs.setupHardcoreMobs();
     }
 
     public void setupDefaultSettings() {
         DefaultMobsConfiguration.setupDefaultMobs(this.mobsConfig);
+        DefaultItemsConfiguration.setupDefaultItems(this.itemsConfig);
+        GlobalConfiguration.setupDefaultConfig(this.infernalCraftConfig);
     }
 
     public BukkitScheduler getScheduler() {

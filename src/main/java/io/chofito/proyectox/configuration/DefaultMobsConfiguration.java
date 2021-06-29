@@ -8,7 +8,8 @@ public class DefaultMobsConfiguration {
         mobsConfig.setDefault("GuerreroZombie.entity", "ZOMBIE");
         mobsConfig.setDefault("GuerreroZombie.displayName", "Guerrero Zombie");
         mobsConfig.setDefault("GuerreroZombie.mainHand", "IRON_SWORD");
-        mobsConfig.setDefault("GuerreroZombie.spawnChance", 0.75);
+        mobsConfig.setDefault("GuerreroZombie.hardcoreMobsSpawnChance", 0.75);
+        mobsConfig.setDefault("GuerreroZombie.bloodMoonSpawnChance", 0.75);
         mobsConfig.setDefault("GuerreroZombie.damageMultiplier", 1.25);
         mobsConfig.setDefault("GuerreroZombie.lifeMultiplier", 1.5);
         mobsConfig.setDefault("GuerreroZombie.chestplate", "LEATHER_CHESTPLATE");
@@ -20,7 +21,8 @@ public class DefaultMobsConfiguration {
         mobsConfig.setDefault("GuerreroOscuro.displayName", "Guerrero Oscuro");
         mobsConfig.setDefault("GuerreroOscuro.mainHand", "IRON_AXE");
         mobsConfig.setDefault("GuerreroOscuro.offHand", "TOTEM_OF_UNDYING");
-        mobsConfig.setDefault("GuerreroOscuro.spawnChance", 0.1);
+        mobsConfig.setDefault("GuerreroZombie.hardcoreMobsSpawnChance", 0);
+        mobsConfig.setDefault("GuerreroZombie.bloodMoonSpawnChance", 0.2);
         mobsConfig.setDefault("GuerreroOscuro.damageMultiplier", 2);
         mobsConfig.setDefault("GuerreroOscuro.lifeMultiplier", 2.5);
         mobsConfig.setDefault("GuerreroOscuro.chestplate", "NETHERITE_CHESTPLATE");

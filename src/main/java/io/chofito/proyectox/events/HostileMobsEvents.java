@@ -12,36 +12,22 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import io.chofito.proyectox.utils.GlobalHelpers;
 
 public class HostileMobsEvents {
-    public static void setupCustomZombieSpawn() {
-        Events.subscribe(CreatureSpawnEvent.class)
-                .filter(event -> event.getEntity().getType() == EntityType.ZOMBIE)
-                .filter(event -> event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL)
-                .handler(event -> {
-                    LivingEntity zombieEntity = event.getEntity();
-                    ItemStack chestplate = new ItemStack(Material.DIAMOND_CHESTPLATE, 1);
+    private Json infernalCraftConfig;
 
-                    zombieEntity.setCustomName("Zombie Mamadisimo");
-                    zombieEntity.getEquipment().setChestplate(chestplate);
-                });
+    public HostileMobsEvents(Json infernalCraftConfig) {
+        this.infernalCraftConfig = infernalCraftConfig;
     }
 
-    public static void setupCustomCreeperSpawn(Json config) {
-        Events.subscribe(CreatureSpawnEvent.class)
-                .filter(event -> event.getEntity().getType() == EntityType.CREEPER)
-                .filter(event -> event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL)
-                .handler(event -> {
-                    if (GlobalHelpers.getChance(config.getOrSetDefault("chargedCreeperSpawnChance", 0.5))) {
-                        Creeper creeperEntity = (Creeper) event.getEntity();
-                        creeperEntity.setPowered(true);
-                        creeperEntity.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999, 999999));
-                    }
-                });
+    public void setupEvents() {
+        this.setupShulkerExplosion();
+        this.onCreeperDeathRemovePotionEffect();
+        this.setupCustomSkeletonSpawn();
+
     }
 
-    public static void onCreeperDeathRemovePotionEffect() {
+    public void onCreeperDeathRemovePotionEffect() {
         Events.subscribe(EntityExplodeEvent.class)
                 .filter(event -> event.getEntity().getType() == EntityType.CREEPER)
                 .handler(event -> {
@@ -52,7 +38,7 @@ public class HostileMobsEvents {
                 });
     }
 
-    public static void setupCustomSkeletonSpawn() {
+    public void setupCustomSkeletonSpawn() {
         Events.subscribe(CreatureSpawnEvent.class)
                 .filter(event -> event.getEntity().getType() == EntityType.SKELETON)
                 .filter(event -> event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL)
@@ -69,7 +55,7 @@ public class HostileMobsEvents {
                 });
     }
 
-    public static void setupShulkerExplosion() {
+    public void setupShulkerExplosion() {
         Events.subscribe(ProjectileHitEvent.class)
                 .filter(e -> e.getEntity().getType() == EntityType.SHULKER_BULLET)
                 .filter(e -> e.getHitEntity() != null)

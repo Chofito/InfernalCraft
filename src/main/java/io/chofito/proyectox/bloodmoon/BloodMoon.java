@@ -5,21 +5,16 @@ import io.chofito.proyectox.ProyectoX;
 import io.chofito.proyectox.mobs.EntityBuilder;
 import io.chofito.proyectox.random.ObjectWeighted;
 import io.chofito.proyectox.utils.GlobalHelpers;
-import io.chofito.proyectox.utils.ItemHelpers;
 import me.lucko.helper.Events;
 import me.lucko.helper.Schedulers;
-import me.lucko.helper.item.ItemStackBuilder;
 import me.lucko.helper.random.RandomSelector;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -36,10 +31,10 @@ public class BloodMoon {
     private boolean isCurrentOrNextDayChecked = false;
     private Random random = new Random();
 
-    public BloodMoon(World bloodMoonWorld, Json config) {
+    public BloodMoon(World bloodMoonWorld, Json config, Json mobsConfig) {
         this.world = bloodMoonWorld;
         this.bloodMoonConfig = config;
-        this.mobsConfig = ProyectoX.getInstance().getMobsConfig();
+        this.mobsConfig = mobsConfig;
 
         setupSomeDefaultSettings();
 
@@ -252,7 +247,7 @@ public class BloodMoon {
             List<ObjectWeighted> hordeEnemiesWeighted = new ArrayList<>();
 
             for (String enemyName : hordeEnemiesNames) {
-                double spawnChance = mobsConfig.getOrSetDefault(enemyName + ".spawnChance", 0.25);
+                double spawnChance = mobsConfig.getOrSetDefault(enemyName + ".bloodMoonSpawnChance", 0.25);
                 hordeEnemiesWeighted.add(new ObjectWeighted(enemyName, spawnChance));
             }
 
